@@ -1,53 +1,114 @@
-import { useState, useEffect } from 'react';
-import NoteItem from '../components/NoteItem.components.jsx';
-import { Sun } from 'lucide-react';
-
-// Mock data - replace with API call
-const initialNotes = [
-  { id: 1, text: 'This is the first note.' },
-  { id: 2, text: 'This is the second note.' },
-];
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import NoteItem from "../components/NoteItem.components.jsx";
+import { Sun } from "lucide-react";
+import axios from "axios";
 
 const Dashboard = () => {
   const [notes, setNotes] = useState([]);
-  const [user, setUser] = useState({ name: 'Jonas Khanwald', Email: 'jonaskhanwald123456@gmail.com' }); // Mock user
+  const [user, setUser] = useState({});
+  const navigate = useNavigate();
 
-  // Fetch notes when the component mounts
+  // LocalStorage data
+  const name = localStorage.getItem("Name");
+  const email = localStorage.getItem("Email");
+  const pic = localStorage.getItem("Pic");
+
+  // Fetch user + notes
   useEffect(() => {
-    // TODO: Add API call to fetch user's notes
-    console.log("Fetching notes for the user...");
-    setNotes(initialNotes);
+    const fetchData = async () => {
+      try {
+        // ✅ need route: GET /me
+        const userRes = await axios.get("need route", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
+        });
+        console.log("User API response:", userRes.data);
+        setUser(userRes.data);
+
+        // ✅ need route: GET /notes
+        const notesRes = await axios.get("need route", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
+        });
+        console.log("Notes API response:", notesRes.data);
+
+        // 🛠 Ensure notes is always an array
+        const fetchedNotes = Array.isArray(notesRes.data)
+          ? notesRes.data
+          : notesRes.data.notes || [];
+
+        setNotes(fetchedNotes);
+      } catch (err) {
+        console.error("Error fetching dashboard data", err);
+      }
+    };
+    fetchData();
   }, []);
 
-  const handleDeleteNote = (id) => {
-    // TODO: Add API call to delete the note
-    setNotes(notes.filter((note) => note.id !== id));
-    console.log(`Deleting note with id: ${id}`);
-  };
-
-  const handleCreateNote = () => {
-    const newNoteText = prompt("Enter your new note:");
-    if (newNoteText && newNoteText.trim() !== "") {
-      const newNote = { id: Date.now(), text: newNoteText };
-      // TODO: Add API call to create the note
-      setNotes([newNote, ...notes]);
-      console.log("Creating new note:", newNoteText);
+  // Delete a note
+  const handleDeleteNote = async (id) => {
+    try {
+      // ✅ need route: DELETE /notes/:id
+      await axios.delete(`need route/${id}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
+      });
+      setNotes(notes.filter((n) => n.id !== id));
+    } catch (err) {
+      console.error("Delete note failed", err);
     }
   };
 
-  const handleLogout = () => {
-    // TODO: Implement logout logic (clear token, redirect)
-    console.log("Logging out...");
+  // Create a new note
+  const handleCreateNote = async () => {
+    const newNoteText = prompt("Enter your new note:");
+    if (!newNoteText || newNoteText.trim() === "") return;
+
+    try {
+      // ✅ need route: POST /notes
+      const res = await axios.post(
+        "need route",
+        { text: newNoteText },
+        { headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` } }
+      );
+
+      console.log("Create Note API response:", res.data);
+
+      // 🛠 Ensure the new note object is valid
+      setNotes([res.data, ...notes]);
+    } catch (err) {
+      console.error("Create note failed", err);
+    }
+  };
+
+  // Logout
+  const handleLogout = async () => {
+    try {
+      // ✅ need route: POST /logout
+      // await axios.post(
+      //   "need route",
+      //   {},
+      //   { headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` } }
+      // );
+      console.log("hit logout")
+    } catch (err) {
+      console.error("Logout failed", err);
+    } finally {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("Name");
+      localStorage.removeItem("Email");
+      localStorage.removeItem("Pic");
+      navigate("/signin");
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center p-4 font-sans">
       <div className="w-full max-w-md">
+        {/* Header */}
         <header className="flex justify-between items-center py-4">
-           <h1 className="text-xl font-semibold flex items-center gap-2 text-gray-800">
-              <Sun className="text-blue-600" /> HD
-            </h1>
-          <button 
+          <h1 className="text-xl font-semibold flex items-center gap-2 text-gray-800">
+            <Sun className="text-blue-600" /> HD
+          </h1>
+          <button
             onClick={handleLogout}
             className="text-sm font-medium text-gray-600 hover:text-gray-900"
           >
@@ -55,24 +116,37 @@ const Dashboard = () => {
           </button>
         </header>
 
+        {/* Main */}
         <main className="mt-4">
-          <h2 className="text-2xl font-bold text-gray-900">Welcome, {user.name}!</h2>
-          <span className="text-xl text-gray-700">Email: {user.Email}</span>
-          
+          <div className="flex items-center gap-3">
+            {pic && (
+              <img
+                src={pic}
+                alt="profile"
+                className="w-10 h-10 rounded-full border border-gray-300"
+              />
+            )}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Welcome, {name}!</h2>
+              <span className="text-sm text-gray-700">Email: {email}</span>
+            </div>
+          </div>
+
           <button
             onClick={handleCreateNote}
-            className="mt-6 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            className="mt-6 w-full flex justify-center py-2 px-4 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
           >
             Create Note
           </button>
 
+          {/* Notes List */}
           <div className="mt-8 space-y-4">
             {notes.length > 0 ? (
               notes.map((note) => (
                 <NoteItem
-                  key={note.id}
+                  key={note.id || note._id}
                   note={note}
-                  onDelete={() => handleDeleteNote(note.id)}
+                  onDelete={() => handleDeleteNote(note.id || note._id)}
                 />
               ))
             ) : (

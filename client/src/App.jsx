@@ -1,36 +1,40 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import SignUp from './pages/Login.page.jsx';
-import SignIn from './pages/Register.page.jsx';
-import Dashboard from './pages/Dashboard.page.jsx';
-
-// A simple component to protect routes
-const PrivateRoute = ({ children }) => {
-  // TODO: Replace this with your actual authentication check
-  // e.g., check if a JWT exists in localStorage
-  const isAuthenticated = true; 
-  return isAuthenticated ? children : <Navigate to="/signin" />;
-};
-
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import SignUp from "./pages/Signup.page.jsx";  // Your SignUp page
+import SignIn from "./pages/Signin.page.jsx"; // Your SignIn page
+import Dashboard from "./pages/Dashboard.page.jsx";
+import {GoogleOAuthProvider} from '@react-oauth/google'
 
 function App() {
+
+  const googleAuthWrapper = ()=>{
+    return (
+      <GoogleOAuthProvider clientId="440964308806-v954gn8tg6bpnvdcrmesj3mf4vt8fmfq.apps.googleusercontent.com">
+        <SignUp></SignUp>
+      </GoogleOAuthProvider>
+    )
+  }
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/signup" element={<SignUp />} />
+        <Route path="/signup" element={googleAuthWrapper()} />
         <Route path="/signin" element={<SignIn />} />
-        <Route 
-          path="/dashboard" 
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
+        {/* Redirect base URL */}
+        <Route
+          path="/"
           element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          } 
+            localStorage.getItem("authToken") ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Navigate to="/signin" replace />
+            )
+          }
         />
-        {/* Redirect base URL to the dashboard */}
-        <Route 
-          path="/" 
-          element={<Navigate to="/dashboard" />} 
-        />
+        {/* Catch-all route */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
