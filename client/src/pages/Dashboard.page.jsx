@@ -58,26 +58,26 @@ const Dashboard = () => {
   };
 
   // Create a new note
-  const handleCreateNote = async () => {
-    const newNoteText = prompt("Enter your new note:");
-    if (!newNoteText || newNoteText.trim() === "") return;
+  // const handleCreateNote = async () => {
+  //   const newNoteText = prompt("Enter your new note:");
+  //   if (!newNoteText || newNoteText.trim() === "") return;
 
-    try {
-      // ✅ need route: POST /notes
-      const res = await axios.post(
-        "need route",
-        { text: newNoteText },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` } }
-      );
+  //   try {
+  //     // ✅ need route: POST /notes
+  //     const res = await axios.post(
+  //       "need route",
+  //       { text: newNoteText },
+  //       { headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` } }
+  //     );
 
-      console.log("Create Note API response:", res.data);
+  //     console.log("Create Note API response:", res.data);
 
-      // 🛠 Ensure the new note object is valid
-      setNotes([res.data, ...notes]);
-    } catch (err) {
-      console.error("Create note failed", err);
-    }
-  };
+  //     // 🛠 Ensure the new note object is valid
+  //     setNotes([res.data, ...notes]);
+  //   } catch (err) {
+  //     console.error("Create note failed", err);
+  //   }
+  // };
 
   // Logout
   const handleLogout = async () => {
@@ -133,7 +133,7 @@ const Dashboard = () => {
           </div>
 
           <button
-            onClick={handleCreateNote}
+            onClick={()=>navigate("/noteCreation")}
             className="mt-6 w-full flex justify-center py-2 px-4 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
           >
             Create Note

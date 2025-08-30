@@ -5,3 +5,4 @@ const api = axios.create({
 })
 
 export const googleAuth = (code) => api.get(`/auth/google?code=${code}`);
+export const createNote = (body, head) => api.post('/note/create', body, head);

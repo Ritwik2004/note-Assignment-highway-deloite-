@@ -1,32 +1,42 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createNote } from "../context/AuthContext.jsx";
 
 export const CreateNote = () => {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const [title, setTitle] = useState("");
     const [body, setBody] = useState("");
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!title || !body) {
             alert("Please fill out both fields!");
             return;
         }
-
-        // Here you will call your backend API (need route)
-        const newNote = {
-            title,
-            body,
+        const head = {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("authToken")}`, // attach token here
+            },
         };
 
-        console.log("Note Created:", newNote);
-        // Example: axios.post("need route", newNote);
+        try {
+            // Call backend API to create note
+            const response = await createNote({title,body}, head);
 
-        // Clear the form after submit
-        setTitle("");
-        setBody("");
-        navigate("/dashboard");
+            console.log("Note Created:", response.data);
+
+            // Clear the form after submit
+            setTitle("");
+            setBody("");
+
+            // Redirect to dashboard
+            navigate("/dashboard");
+        } catch (error) {
+            console.error("Error creating note:", error);
+            alert("Failed to create note. Please try again.");
+        }
     };
 
     return (
@@ -70,4 +80,4 @@ export const CreateNote = () => {
             </div>
         </div>
     );
-}
+};

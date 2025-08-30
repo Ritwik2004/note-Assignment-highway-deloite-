@@ -1,8 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import SignUp from "./pages/Signup.page.jsx";  // Your SignUp page
-import SignIn from "./pages/Signin.page.jsx"; // Your SignIn page
+// import SignUp from "./pages/Signup.page.jsx";  // Your SignUp page
+// import SignIn from "./pages/Signin.page.jsx"; // Your SignIn page
+import SignUp from "./pages/Authentication.page.jsx"; // Your authentication page
 import Dashboard from "./pages/Dashboard.page.jsx";
 import {GoogleOAuthProvider} from '@react-oauth/google'
+import { CreateNote } from "./pages/NoteCreation.page.jsx";
 
 function App() {
 
@@ -17,7 +19,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/signup" element={googleAuthWrapper()} />
-        <Route path="/signin" element={<SignIn />} />
+        <Route path="/noteCreation" element={<CreateNote />} />
         <Route
           path="/dashboard"
           element={<Dashboard />}
