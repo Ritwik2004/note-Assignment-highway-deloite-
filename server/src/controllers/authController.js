@@ -51,7 +51,7 @@ const signup = async (req, res) => {
 
         const userFind = await Usergoogle.findOne({ email });
         if (userFind) {
-            return res.json({ success: false, message: "Account with this email already exists..." });
+            return res.status(402).json({message: "Account with this email already exists..." });
         }
 
         const createUser = await Usergoogle.create({
@@ -61,7 +61,7 @@ const signup = async (req, res) => {
         });
 
         if (!createUser) {
-            throw new ApiError(401, "Something went wrong while creating new user...");
+            return res.status(400).json({message : "Something went wrong while creating new user..."});
         }
 
         const { _id } = createUser;
