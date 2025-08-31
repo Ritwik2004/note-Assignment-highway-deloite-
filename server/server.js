@@ -8,9 +8,13 @@ import OtpRouter from './src/routes/Otp.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
+// app.use(cors({
+//     origin : process.env.corsOrigin,
+//     Credential : true
+// }));
 app.use(cors({
-    origin : process.env.corsOrigin,
-    Credential : true
+  origin: process.env.CORS_ORIGIN === "*" ? true : process.env.CORS_ORIGIN,
+  credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
