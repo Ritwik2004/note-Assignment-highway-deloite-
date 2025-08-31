@@ -11,7 +11,7 @@ const googleLogin = async(req, res) => {
 
         const userRes = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`)
         const {email, name} = userRes.data;
-        console.log("data : ", userRes)
+        // console.log("data : ", userRes)
         let user = await Usergoogle.findOne({email});
         if (!user) {
             user = await Usergoogle.create({email, name});
@@ -33,7 +33,7 @@ const googleLogin = async(req, res) => {
         })
         
     } catch (error) {
-        console.log("error : ",error)
+        // console.log("error : ",error)
         res.status(500).json({
             message: 'Error in Google login',
             error: error.message
@@ -42,7 +42,7 @@ const googleLogin = async(req, res) => {
 };
 
 const signup = async (req, res) => {
-    console.log(req.body)
+    // console.log(req.body)
     const { fullName, email, DOB } = req.body;
     try {
         if (!fullName || !email || !DOB) {

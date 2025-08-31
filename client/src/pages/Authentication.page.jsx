@@ -104,13 +104,13 @@ const AuthPage = () => {
     try {
       const res = await Signin({ email });
       console.log(res.data)
-      if(res.data.message == 'Success'){
-      localStorage.setItem("authToken", res.data.token);
-      localStorage.setItem("Email", res.data.userData.email);
-      localStorage.setItem("Name", res.data.userData.name);
-      navigate("/dashboard");
+      if (res.data.message == 'Success') {
+        localStorage.setItem("authToken", res.data.token);
+        localStorage.setItem("Email", res.data.userData.email);
+        localStorage.setItem("Name", res.data.userData.name);
+        navigate("/dashboard");
       }
-      else{
+      else {
         alert(res.data.message)
       }
     } catch (err) {
@@ -245,8 +245,8 @@ const AuthPage = () => {
                   onClick={handleSendOtp}
                   disabled={timer > 0 || loading}
                   className={`mt-2 text-sm font-medium ${timer > 0
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-blue-600 hover:text-blue-500 underline cursor-pointer"
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-blue-600 hover:text-blue-500 underline cursor-pointer"
                     }`}
                 >
                   {timer > 0 ? `Resend OTP in ${timer}s` : "Resend OTP"}

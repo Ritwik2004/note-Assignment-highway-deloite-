@@ -25,7 +25,7 @@ export const CreateNote = () => {
             // Call backend API to create note
             const response = await createNote({title,body}, head);
 
-            console.log("Note Created:", response.data);
+            // console.log("Note Created:", response.data);
 
             // Clear the form after submit
             setTitle("");

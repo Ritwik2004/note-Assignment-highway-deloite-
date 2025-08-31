@@ -16,11 +16,11 @@ const transporter = nodemailer.createTransport({
 // --- Send OTP ---
 const sendOtp = async (req, res) => {
   const { email } = req.body;
-  console.log("email : ",email)
+  // console.log("email : ",email)
   if (!email) return res.status(400).json({ success: false, message: 'Email is required.' });
 
   const otpCode = generateOtp();
-  console.log("otpCode : ",otpCode)
+  // console.log("otpCode : ",otpCode)
   try {
     await Otp.deleteMany({ email }); // remove old OTPs
     await Otp.create({ email, otp: otpCode });
@@ -44,9 +44,9 @@ const verifyOtp = async (req, res) => {
   if (!email || !otp) return res.status(400).json({ success: false, message: 'Email and OTP are required.' });
 
   try {
-    console.log(email,otp)
+    // console.log(email,otp)
     const record = await Otp.findOne({ email, otp: otp.toString() });
-    console.log(record)
+    // console.log(record)
     if (!record) {
       return res.status(400).json({ success: false, message: 'Invalid or expired OTP.' });
     }

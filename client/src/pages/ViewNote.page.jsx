@@ -8,13 +8,13 @@ const NoteView = ({ title, body, onClose }) => {
     {/* Close Button */}
     <button
       onClick={onClose}
-      className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+      className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 cursor-pointer"
     >
       <X size={24} />
     </button>
 
     {/* Note Content */}
-    <h2 className="text-2xl font-bold text-gray-900 mb-4">{title}</h2>
+    <h2 className="text-2xl text-center font-bold text-gray-900 mb-4">{title}</h2>
     <p className="text-gray-700 whitespace-pre-line">{body}</p>
   </div>
 </div>

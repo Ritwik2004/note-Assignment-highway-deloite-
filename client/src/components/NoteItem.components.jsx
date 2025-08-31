@@ -11,7 +11,7 @@ const NoteItem = ({ note, onDelete }) => {
       </div>
       <button
         onClick={onDelete}
-        className="text-gray-400 hover:text-red-500 transition-colors"
+        className="text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
         aria-label={`Delete note: ${note.text}`}
       >
         <Trash2 size={20} />

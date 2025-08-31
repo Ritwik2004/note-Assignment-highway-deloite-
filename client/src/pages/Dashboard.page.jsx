@@ -25,7 +25,7 @@ const Dashboard = () => {
         const notesRes = await fetchNotes({
           headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
         });
-        console.log("Notes API response:", notesRes.data);
+        // console.log("Notes API response:", notesRes.data);
 
         // 🛠 Ensure notes is always an array
         const fetchedNotes = Array.isArray(notesRes.data)
@@ -79,7 +79,7 @@ const Dashboard = () => {
   // Logout
   const handleLogout = async () => {
     try {
-      console.log("hit logout")
+      // console.log("hit logout")
     } catch (err) {
       console.error("Logout failed", err);
     } finally {
