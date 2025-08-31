@@ -4,6 +4,7 @@ import Authrouter from './src/routes/authRouter.js';
 import DBconnection from './src/database/db.js';
 import cors from 'cors';
 import Noterouter from './src/routes/note.route.js';
+import OtpRouter from './src/routes/Otp.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -12,12 +13,14 @@ app.use(cors({
     Credential : true
 }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req,res) => {
     res.send('Hello World');
 });
 app.use('/auth', Authrouter)
 app.use('/note', Noterouter)
+app.use('/otp', OtpRouter)
 
 DBconnection()
 

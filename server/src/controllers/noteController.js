@@ -32,9 +32,9 @@ const createNote = async(req, res)=>{
     }
 }
 
-const fetchNote = async()=>{
+const fetchNote = async(req,res)=>{
     try {
-    const userId = req.user._id; // user ID from auth middleware
+    const userId = req.user.id; // user ID from auth middleware
 
     const notes = await Notes.find({ userID: userId })
       .sort({ createdAt: -1 }); // -1 = descending (latest first)
@@ -50,10 +50,10 @@ const fetchNote = async()=>{
   }
 }
 
-const deleteNote = async()=>{
+const deleteNote = async(req,res)=>{
      try {
     const noteId = req.params.id;   // note ID will come from URL params
-    const userId = req.user._id;    // user ID comes from logged-in user
+    const userId = req.user.id;    // user ID comes from logged-in user
 
     // Find the note by ID and user
     const note = await Notes.findOne({ _id: noteId, userID: userId });

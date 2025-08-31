@@ -31,7 +31,7 @@ function App() {
             localStorage.getItem("authToken") ? (
               <Navigate to="/dashboard" replace />
             ) : (
-              <Navigate to="/signin" replace />
+              <Navigate to="/signup" replace />
             )
           }
         />

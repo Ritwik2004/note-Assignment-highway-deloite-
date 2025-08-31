@@ -2,66 +2,96 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout.components.jsx";
 import { Mail, Eye } from "lucide-react";
-import axios from "axios";
+import googleLogo from '../assets/google.logo.svg'
 import { useGoogleLogin } from "@react-oauth/google";
-import { googleAuth } from "../context/AuthContext.jsx";
+import { googleAuth, sendOtp, Signin, Signup, verifyOtp } from "../context/AuthContext.jsx";
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(true);
+
+  // Steps
   const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+
+  // Form fields
+  const [email, setEmail] = useState("");
+  const [fullName, setFullname] = useState("");
+  const [DOB, setDob] = useState("");
+  const [otp, setOtp] = useState("");
+  const [loading, setLoading] = useState(false)
+  const [loadingGoogle, setLoadingGoogle] = useState(false)
+
   const navigate = useNavigate();
 
-  // ---------------- SIGN UP ----------------
-  const handleGetOtp = async (e) => {
-    e.preventDefault();
-    const email = e.target.email.value;
+  // ---------------- OTP FLOW ----------------
+  const handleSendOtp = async () => {
+    setLoading(true)
     try {
-      // ✅ need route: POST /send-otp
-      await axios.post("need route", { email });
+      await sendOtp(email);
       setOtpSent(true);
+      alert("OTP sent! Check your email.");
     } catch (err) {
-      console.error("OTP request failed", err);
-      alert("Error sending OTP");
+      alert(err?.response?.data?.message || "Failed to send OTP.");
     }
+    setLoading(false)
   };
 
+  const handleVerifyOtp = async () => {
+    setLoading(true)
+    try {
+      await verifyOtp(email, otp); 
+      setOtpVerified(true);
+      alert("OTP verified successfully!");
+    } catch (err) {
+      alert(err?.response?.data?.message || "Invalid OTP.");
+    }
+    setLoading(false)
+  };
+
+  // ---------------- SIGN UP ----------------
   const handleSignUp = async (e) => {
+    setLoading(true)
     e.preventDefault();
-    const name = e.target.name.value;
-    const dob = e.target.dob.value;
-    const email = e.target.email.value;
-    const otp = e.target.otp.value;
 
     try {
-      // ✅ need route: POST /verify-otp
-      const res = await axios.post("need route", { name, dob, email, otp });
+      const res = await Signup({
+        fullName,
+        DOB,
+        email,
+      });
       localStorage.setItem("authToken", res.data.token);
+      localStorage.setItem("Name", fullName);
+      localStorage.setItem("Email", email);
       navigate("/dashboard");
     } catch (err) {
       console.error("SignUp failed", err);
-      alert("Invalid OTP or registration failed");
+      alert("Registration failed");
     }
+    setLoading(false)
   };
 
   // ---------------- SIGN IN ----------------
   const handleSignIn = async (e) => {
+    setLoading(true)
     e.preventDefault();
-    const email = e.target.email.value;
-    const password = e.target.password.value;
 
     try {
-      // ✅ need route: POST /login
-      const res = await axios.post("need route", { email, password });
+      const res = await Signin({ email });
+      console.log(res.data)
       localStorage.setItem("authToken", res.data.token);
+      localStorage.setItem("Email", res.data.userData.email);
+      localStorage.setItem("Name", res.data.userData.name);
       navigate("/dashboard");
     } catch (err) {
       console.error("Login failed", err);
-      alert("Invalid email or password");
+      alert("Login failed");
     }
+    setLoading(false)
   };
 
   // ---------------- GOOGLE ----------------
   const responseGoogle = async (authResult) => {
+    setLoadingGoogle(true)
     try {
       if (authResult["code"]) {
         const result = await googleAuth(authResult["code"]);
@@ -75,6 +105,7 @@ const AuthPage = () => {
     } catch (error) {
       console.log("Error while requesting google code : ", error);
     }
+    setLoadingGoogle(false)
   };
 
   const handleGoogleLogin = useGoogleLogin({
@@ -95,161 +126,132 @@ const AuthPage = () => {
             : "Please sign in to continue to your account."}
         </p>
 
-        {/* SIGN UP FORM */}
-        {isSignUp ? (
-          <form
-            onSubmit={otpSent ? handleSignUp : handleGetOtp}
-            className="mt-8 space-y-6"
-          >
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="name" className="text-sm font-medium text-gray-700">
-                  Your Name
-                </label>
+        <form
+          onSubmit={isSignUp ? handleSignUp : handleSignIn}
+          className="mt-8 space-y-6"
+        >
+          <div className="space-y-4">
+            {isSignUp && (
+              <>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullname(e.target.value)}
+                    disabled={otpSent}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                    placeholder="Jonas Khanwald"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Date of Birth
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={DOB}
+                    onChange={(e) => setDob(e.target.value)}
+                    disabled={otpSent}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+              </>
+            )}
+
+            <div>
+              <label className="text-sm font-medium text-gray-700">Email</label>
+              <div className="relative mt-1">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </span>
                 <input
-                  id="name"
-                  name="name"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={otpSent && !otpVerified}
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md"
+                  placeholder="jonas_kahnwald@gmail.com"
+                />
+              </div>
+            </div>
+
+            {otpSent && !otpVerified && (
+              <div>
+                <label className="text-sm font-medium text-gray-700">OTP</label>
+                <input
                   type="text"
                   required
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                  placeholder="Jonas Khanwald"
-                  disabled={otpSent}
+                  placeholder="Enter OTP"
                 />
               </div>
-              <div>
-                <label htmlFor="dob" className="text-sm font-medium text-gray-700">
-                  Date of Birth
-                </label>
-                <input
-                  id="dob"
-                  name="dob"
-                  type="date"
-                  required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                  disabled={otpSent}
-                />
-              </div>
-              <div className="relative">
-                <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                  Email
-                </label>
-                <div className="relative mt-1">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                    <Mail className="h-5 w-5 text-gray-400" />
-                  </span>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md"
-                    placeholder="jonas_kahnwald@gmail.com"
-                    disabled={otpSent}
-                  />
-                </div>
-              </div>
+            )}
+          </div>
 
-              {otpSent && (
-                <div className="relative">
-                  <label htmlFor="otp" className="text-sm font-medium text-gray-700">
-                    OTP
-                  </label>
-                  <div className="relative mt-1">
-                    <input
-                      id="otp"
-                      name="otp"
-                      type="text"
-                      required
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md"
-                      placeholder="Enter 6-digit OTP"
-                    />
-                    <span className="absolute inset-y-0 right-0 flex items-center pr-3">
-                      <Eye className="h-5 w-5 text-gray-400" />
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
+          {/* Step buttons */}
+          {!otpSent && (
+            <button
+              type="button"
+              onClick={handleSendOtp}
+              disabled={loading}
+              className="w-full py-3 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {loading ? <span className='w-4 h-4 my-1 rounded-full border-2 border-t-transparent animate-spin'></span> : ""}
+              Verify Your Email
+            </button>
+          )}
 
-            <div>
-              <button
-                type="submit"
-                className="w-full flex justify-center py-3 px-4 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-              >
-                {otpSent ? "Sign up" : "Get OTP"}
-              </button>
-            </div>
-          </form>
-        ) : (
-          // SIGN IN FORM
-          <form onSubmit={handleSignIn} className="mt-8 space-y-6">
-            <div className="space-y-4">
-              <div className="relative">
-                <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                  Email
-                </label>
-                <div className="relative mt-1">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                    <Mail className="h-5 w-5 text-gray-400" />
-                  </span>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md"
-                    placeholder="jonas_kahnwald@gmail.com"
-                  />
-                </div>
-              </div>
+          {otpSent && !otpVerified && (
+            <button
+              type="button"
+              onClick={handleVerifyOtp}
+              disabled={loading}
+              // className="w-full py-3 rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+              className="w-full py-3 rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2"
+            >
+              {loading ? <span className='w-4 h-4 my-1 rounded-full border-2 border-t-transparent animate-spin'></span> : ""}
+              Verify OTP
+            </button>
+          )}
 
-              <div className="relative">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="text-sm font-medium text-gray-700">
-                    Password
-                  </label>
-                  <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500">
-                    Forgot password?
-                  </a>
-                </div>
-                <div className="relative mt-1">
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md"
-                    placeholder="••••••••"
-                  />
-                  <span className="absolute inset-y-0 right-0 flex items-center pr-3">
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                className="w-full flex justify-center py-3 px-4 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-              >
-                Sign in
-              </button>
-            </div>
-          </form>
-        )}
+          {otpVerified && (
+            <button
+              type="submit"
+              disabled={loading}
+              // className="w-full py-3 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+              className="w-full py-3 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2"
+            >
+              {loading ? <span className='w-4 h-4 my-1 rounded-full border-2 border-t-transparent animate-spin'></span> : ""}
+              Submit
+            </button>
+          )}
+        </form>
 
         {/* GOOGLE SIGN-IN */}
         <div className="mt-4">
           <button
             onClick={handleGoogleLogin}
-            className="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            disabled={loadingGoogle}
+            className="w-full py-3 rounded-md text-sm font-medium border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 flex items-center justify-center gap-2 cursor-pointer"
           >
+            {loadingGoogle ? (
+              <span className="w-4 h-4 rounded-full border-2 border-gray-400 border-t-transparent animate-spin"></span>
+            ) : (
+              <img src={googleLogo} alt="Google Logo" className="w-5 h-5" />
+            )}
             {isSignUp ? "Signup with Google" : "Sign in with Google"}
           </button>
         </div>
 
-        {/* TOGGLE */}
+        {/* Toggle */}
         {isSignUp ? (
           <p className="mt-6 text-center text-sm text-gray-600">
             Already have an account?{" "}

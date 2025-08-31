@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import NoteItem from "../components/NoteItem.components.jsx";
 import { Sun } from "lucide-react";
 import axios from "axios";
+import { fetchNotes } from "../context/AuthContext.jsx";
+import { deleteNotes } from "../context/AuthContext.jsx";
 
 const Dashboard = () => {
   const [notes, setNotes] = useState([]);
-  const [user, setUser] = useState({});
+  // const [user, setUser] = useState({});
   const navigate = useNavigate();
 
   // LocalStorage data
@@ -18,15 +20,9 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // ✅ need route: GET /me
-        const userRes = await axios.get("need route", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
-        });
-        console.log("User API response:", userRes.data);
-        setUser(userRes.data);
 
         // ✅ need route: GET /notes
-        const notesRes = await axios.get("need route", {
+        const notesRes = await fetchNotes({
           headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
         });
         console.log("Notes API response:", notesRes.data);
@@ -46,16 +42,17 @@ const Dashboard = () => {
 
   // Delete a note
   const handleDeleteNote = async (id) => {
-    try {
-      // ✅ need route: DELETE /notes/:id
-      await axios.delete(`need route/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
-      });
-      setNotes(notes.filter((n) => n.id !== id));
-    } catch (err) {
-      console.error("Delete note failed", err);
-    }
-  };
+  try {
+    await deleteNotes(id, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` }
+    });
+
+    setNotes(notes.filter((n) => n._id !== id)); // ✅ use _id
+  } catch (err) {
+    console.error("Delete note failed", err);
+  }
+};
+
 
   // Create a new note
   // const handleCreateNote = async () => {
@@ -82,12 +79,6 @@ const Dashboard = () => {
   // Logout
   const handleLogout = async () => {
     try {
-      // ✅ need route: POST /logout
-      // await axios.post(
-      //   "need route",
-      //   {},
-      //   { headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` } }
-      // );
       console.log("hit logout")
     } catch (err) {
       console.error("Logout failed", err);
@@ -96,7 +87,7 @@ const Dashboard = () => {
       localStorage.removeItem("Name");
       localStorage.removeItem("Email");
       localStorage.removeItem("Pic");
-      navigate("/signin");
+      navigate("/signup");
     }
   };
 
@@ -110,22 +101,22 @@ const Dashboard = () => {
           </h1>
           <button
             onClick={handleLogout}
-            className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            className="text-sm font-medium underline cursor-pointer text-blue-600 hover:text-blue-500"
           >
-            Logout
+            Sign Out
           </button>
         </header>
 
         {/* Main */}
         <main className="mt-4">
           <div className="flex items-center gap-3">
-            {pic && (
+            {/* {pic && (
               <img
                 src={pic}
                 alt="profile"
                 className="w-10 h-10 rounded-full border border-gray-300"
               />
-            )}
+            )} */}
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Welcome, {name}!</h2>
               <span className="text-sm text-gray-700">Email: {email}</span>
@@ -134,7 +125,7 @@ const Dashboard = () => {
 
           <button
             onClick={()=>navigate("/noteCreation")}
-            className="mt-6 w-full flex justify-center py-2 px-4 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+            className="mt-6 w-full flex justify-center cursor-pointer py-2 px-4 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
           >
             Create Note
           </button>
@@ -147,6 +138,7 @@ const Dashboard = () => {
                   key={note.id || note._id}
                   note={note}
                   onDelete={() => handleDeleteNote(note.id || note._id)}
+                  onView={() => handleViewNote(note.id || note._id)}
                 />
               ))
             ) : (

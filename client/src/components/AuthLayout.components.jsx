@@ -8,7 +8,7 @@ const AuthLayout = ({ children }) => {
         {/* Form Section */}
         <div className="w-full md:w-1/2 p-8 sm:p-12 flex flex-col">
           <header className="mb-8">
-            <h1 className="text-xl font-semibold flex items-center gap-2 text-gray-800">
+            <h1 className="text-xl font-semibold flex items-center justify-center lg:justify-start gap-2 text-gray-800">
               <Sun className="text-blue-600" /> HD
             </h1>
           </header>

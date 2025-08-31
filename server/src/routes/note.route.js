@@ -6,6 +6,7 @@ const Noterouter = express.Router();
 
 Noterouter.post('/create',protectRoute,createNote)
 Noterouter.get('/fetchNote',protectRoute,fetchNote)
-Noterouter.get('/deleteNote',protectRoute,deleteNote)
+Noterouter.delete('/deleteNote/:id', protectRoute, deleteNote);
+
 
 export default Noterouter;
