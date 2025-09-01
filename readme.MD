@@ -177,7 +177,12 @@ npm run dev
 
 ## 📸 Screenshots
 
-*Add your application screenshots here*
+![Signup Desktop](screenshot/ass1.png)
+![Signin Desktop](screenshot/ass2.png)
+![Dashboard](screenshot/ass3.png)
+![Signup Mobile](screenshot/ass4.png)
+
+
 
 ## 👨‍💻 Author
 
