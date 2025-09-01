@@ -12,11 +12,8 @@ const PORT = process.env.PORT || 8000;
 //     origin : process.env.corsOrigin,
 //     Credential : true
 // }));
-app.use(cors({
-  origin: process.env.CORS_ORIGIN === "*" ? true : process.env.CORS_ORIGIN,
-  credentials: true
-}));
 app.use(express.json());
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req,res) => {
@@ -26,7 +23,7 @@ app.use('/auth', Authrouter)
 app.use('/note', Noterouter)
 app.use('/otp', OtpRouter)
 
-DBconnection()
+await DBconnection()
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

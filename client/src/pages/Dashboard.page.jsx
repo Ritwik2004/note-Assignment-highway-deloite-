@@ -2,13 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NoteItem from "../components/NoteItem.components.jsx";
 import { Sun } from "lucide-react";
-import axios from "axios";
 import { fetchNotes } from "../context/AuthContext.jsx";
 import { deleteNotes } from "../context/AuthContext.jsx";
 
 const Dashboard = () => {
   const [notes, setNotes] = useState([]);
-  // const [user, setUser] = useState({});
   const navigate = useNavigate();
 
   // LocalStorage data
@@ -20,14 +18,11 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-
-        // ✅ need route: GET /notes
         const notesRes = await fetchNotes({
           headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
         });
-        // console.log("Notes API response:", notesRes.data);
 
-        // 🛠 Ensure notes is always an array
+        // Ensure notes is always an array
         const fetchedNotes = Array.isArray(notesRes.data)
           ? notesRes.data
           : notesRes.data.notes || [];
@@ -53,29 +48,6 @@ const Dashboard = () => {
   }
 };
 
-
-  // Create a new note
-  // const handleCreateNote = async () => {
-  //   const newNoteText = prompt("Enter your new note:");
-  //   if (!newNoteText || newNoteText.trim() === "") return;
-
-  //   try {
-  //     // ✅ need route: POST /notes
-  //     const res = await axios.post(
-  //       "need route",
-  //       { text: newNoteText },
-  //       { headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` } }
-  //     );
-
-  //     console.log("Create Note API response:", res.data);
-
-  //     // 🛠 Ensure the new note object is valid
-  //     setNotes([res.data, ...notes]);
-  //   } catch (err) {
-  //     console.error("Create note failed", err);
-  //   }
-  // };
-
   // Logout
   const handleLogout = async () => {
     try {
@@ -96,8 +68,8 @@ const Dashboard = () => {
       <div className="w-full max-w-md">
         {/* Header */}
         <header className="flex justify-between items-center py-4">
-          <h1 className="text-xl font-semibold flex items-center gap-2 text-gray-800">
-            <Sun className="text-blue-600" /> HD
+          <h1 className="text-xl font-semibold flex items-center gap-8 text-gray-800">
+            <Sun className="text-blue-600" /> Dashboard
           </h1>
           <button
             onClick={handleLogout}
@@ -117,8 +89,8 @@ const Dashboard = () => {
                 className="w-10 h-10 rounded-full border border-gray-300"
               />
             )} */}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Welcome, {name}!</h2>
+            <div className="w-full p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+              <h2 className="text-2xl font-bold text-gray-900 pb-2">Welcome, {name}!</h2>
               <span className="text-sm text-gray-700">Email: {email}</span>
             </div>
           </div>
@@ -129,9 +101,9 @@ const Dashboard = () => {
           >
             Create Note
           </button>
-
           {/* Notes List */}
           <div className="mt-8 space-y-4">
+              <span className="font-medium text-xl">Notes</span>
             {notes.length > 0 ? (
               notes.map((note) => (
                 <NoteItem
